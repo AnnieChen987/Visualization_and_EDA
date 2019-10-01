@@ -1,0 +1,150 @@
+---
+title: "Vis_ggplot2"
+author: "Yineng Chen"
+date: "2019/9/26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggridges)
+```
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
+                      var = c("PRCP", "TMIN", "TMAX"), 
+                      date_min = "2017-01-01",
+                      date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+
+```
+
+## creat a ggplot
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) # where is the data, how is the mapings, I don't tell ggplot what graph ti make
+
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point()
+
+```
+
+## alternative ways of making this plot.
+```{r}
+weather_df %>%
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+## saving initial plots. mostly don't use it
+```{r}
+scatterplot = 
+  weather_df %>%
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+  
+```
+## adding color
+```{r}
+weather_df %>%
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name),alpha = .5)+
+  geom_smooth(se = FALSE)
+
+weather_df %>%
+  ggplot(aes(x = tmin, y = tmax,color = name)) + #colors in all part of graph
+  geom_point(alpha = .5)+
+  geom_smooth(se = FALSE)
+
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + #sd 
+  facet_grid(. ~ name)
+```
+
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_point(aes(size = prcp), alpha = .5) +
+  geom_smooth(size = 2,se = FALSE) + 
+  facet_grid(. ~ name)
+
+```
+
+## some extra
+```{r}
+ggplot(weather_df, aes(x = date, y = tmax, color = name)) + 
+  geom_smooth(size = 2,se = FALSE) 
+```
+## 2d
+```{r}
+
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmax)) + 
+  geom_histogram()
+
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_histogram()
+
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_histogram(position = "dodge", binwidth = 2)
+
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_histogram()+
+  facet_grid(~name)
+
+
+```
+
+## density plots
+```{r}
+ggplot(weather_df, aes(x = tmax, fill = name)) + 
+  geom_density(alpha = .3)
+```
+## boxline
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+
+
+```
+## violin and  ridge plots when conmbine density and boxline
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_violin()
+
+ggplot(weather_df, aes(x = tmax, y = name)) + 
+  geom_density_ridges(scale = .85)
+
+ggplot(weather_df, aes(x = tmax, y = name, fill = name)) + 
+  geom_density_ridges(scale = .5)
+```
+saving a plot
+```{r}
+weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) 
+
+ggsave("weather_plot.pdf", weather_plot, width = 8, height = 5) # file name,the thing I want to save,
+
+```
+
+```{r, fig.width=6}
+weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) 
+```
+```{r,fig.width=12}
+weather_plot = ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) 
+```
+
